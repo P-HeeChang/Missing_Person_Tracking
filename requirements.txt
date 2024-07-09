@@ -1,0 +1,7 @@
+opencv-python
+numpy
+Flask
+Flask-SocketIO
+PyMySQL
+Requests
+ultralytics

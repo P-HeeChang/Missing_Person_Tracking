@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실종자 추적</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        html {
+            font-family: 'g마켓 산스 TTF', sans-serif;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            margin: 0;
+            background-color: #f8f8f8;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 1300px;
+            background-color: #646363;
+            border-radius: 12px;
+            color: #000000;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+                #img-button img {
+            width: 30px; /* 이미지의 크기 조정 */
+        }
+
+        .header-text {
+            background-color: #ffffff;
+            border: 1px solid #ffffff; /* 보더 스타일 설정 */
+            padding: 5px 20px; /* 내부 여백 설정 */
+            border-radius: 12px; /* 보더의 모서리를 둥글게 설정 */
+            margin: 0px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: default;
+        }
+                #img-button {
+            background-color: #ffffff;
+            border: 1px solid #e4e4e4;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 30px;
+            padding: 5px 20px; /* 위, 아래 5px, 왼쪽, 오른쪽 10px 여백 */
+        }
+
+        #img-block {
+            width: 200px;
+            height: 600px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        border-radius: 5px;
+        position: absolute;
+        top: 30px;
+        left: -120px;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    #back_page {
+        background-color: #f8f8f8;
+        padding: 10px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        border-top: 1px solid #e6e5e5;
+    }
+
+    #back_btn {
+        margin-right: 100px;
+    }
+
+    .alert-container {
+        margin-top: 20px;
+    }
+
+    .alert {
+        display: none;
+    }
+
+
+    .delete-button {
+    position: relative;
+    top: -35px;
+    right: 15px;
+    background-color: rgba(255, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    }
+
+/*
+    #video-container, #face-images {
+        margin: 10px;
+        width: 100%;
+        height: auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+*/
+    #video-container {
+        width: 300px;
+        padding: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 40px;
+        background-color: #e6e5e5;
+    }
+
+    #status {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        text-align: center;
+        background-color: #f0f0f0;
+        padding: 3px;
+        font-size: 15px;
+        font-weight: bold;
+        width: 580px;
+        margin-top:5px;
+    }
+
+    #video-stream {
+        width: 580px;
+        height: 350px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f0f0f0;
+    }
+
+    #map-container {
+        width: 200px;
+        height: 320px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        vertical-align: top;
+    }
+
+    #map {
+        width: 380px;
+        height: 200px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        margin-top:5px;
+    }
+
+    #drone-route-map {
+        width: 380px;
+        height: 200px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+    }
+
+    #address {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        background-color: #f0f0f0;
+        padding: 3px;
+        font-size: 15px;
+        width: 375px;
+        height: 15px;
+    }
+
+    #drone-route {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        background-color: #f0f0f0;
+        padding: 3px;
+        font-size: 15px;
+        width: 375px;
+        height: 15px;
+    }
+
+    #face-images {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        height: 250px;
+        background-color: #e6e5e5;
+    }
+
+    .face-img {
+        width: 240px;
+        height: 160px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        position: relative;
+        right: -11px
+    }
+
+    #sensor {
+        width: 175px;
+        height: 250px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        text-align: left;
+        background-color: #f0f0f0;
+        padding: 10px;
+        font-size:15px;
+        margin-top:0px;
+    }
+
+    #sensor_label {
+        text-align: center;
+        display: block;
+        font-weight: bold;
+        font-size: 18px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #sensor label:not(#sensor_label) {
+        text-decoration: underline;
+    }
+
+    #button-container {
+        width: 175px;
+        height: 90px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f0f0f0;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        top: 5px;
+    }
+
+    .direction-button {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        margin-top: 0px;
+    }
+
+    .direction-button img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .direction-button:hover {
+        background-color: #e0e0e0;
+    }
+
+    #lower_btn {
+        margin-top: 6px;
+    }
+
+    .image-container {
+        position: relative;
+        width: 240px;
+        height: 200px;
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .close-button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: transparent;
+        border: none;
+        color: #000;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .select-button {
+        position: absolute;
+        top: 2px;
+        right: 30px;
+        background-color: transparent;
+        border: 1px solid #ccc;
+        border-radius: 7px;
+        color: #000;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .container {
+            width: 1300px;
+            height: 800px;
+            background-color: #ffffff;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+        }
+        .row {
+            background-color: #fff;
+            padding: 0px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .row-1 {                            /* 수색기록, 수색통계자료 */
+            height: 470px;
+            display: flex;
+            justify-content: space-between; /* 열을 좌우로 정렬 */
+        }
+
+        .row-2 {                            /* "대상자 수색 사진자료"의 라벨 */
+            height: 50px;
+            background-color: #e4e4e4;
+            font-weight: bold;
+        }
+        .row-3 {                            /* 대상자 수색 사진자료 */
+            height: 180px;
+        }
+        .row-4 {                            /* 동원된 드론 수 */
+            height: 60px;
+            align-items: center;
+            justify-content: space-between; /* 열을 좌우로 정렬 */
+        }
+
+    .column {
+            display: flex;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background-color: #ffffff;
+            justify-content: center;
+            align-items: center;
+            border: 5px solid #e4e4e4;
+            color: #646363;
+<!--            margin-top:55px;-->
+        }
+        .column_1 {                         /* 수색기록 */
+            width: 600px;
+            height: 400px;
+            font-size: 1em;
+            flex-direction: column;
+
+        }
+        .column_2 {                         /* 수색 통계 자료 */
+
+            width: 400px;
+            height: 400px;
+            font-size: 2em;
+            flex-direction: column;
+
+            }
+        .column_3 {
+            width: 200px;
+            height: 400px;
+            font-size: 1em;
+            flex-direction: column;
+            }
+        .column_4 {
+            width: 200px;
+            height: 400px;
+            font-size: 1em;
+            flex-direction: column;
+            }
+        .column_5 {
+            width: 110px;
+            height: 150px;
+            margin: 10px;
+            border: 0px;
+            font-size: 1.1em;
+            }
+        .column_6 {
+            margin-top:0px;
+            width: 250px;
+            height: 140px;
+            margin-left: 40px;
+            font-size: 1.2em;
+            }
+
+        .column_6 img {
+            max-width: 97%;
+            max-height: 97%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+        .column_7 {
+            margin-top:0px;
+            width: 250px;
+            height: 40px;
+
+            }
+        .column_8 {
+            margin-top:0px;
+            width: 300px;
+            height: 40px;
+            border: none;
+            justify-content: center;
+            }
+        .footer_button1 {
+            background-color: #646363;
+            margin: 0px 30px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .footer_button2 {
+            background-color: #646363;
+            margin: 0px 30px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .footer_button3 {
+            background-color: #646363;
+            margin: 0px 30px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .footer_button1, .footer_button2 {
+            background-color: #646363;
+            margin: 0px 30px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .radio-label {
+            font-size: 20px; /* 라벨 글씨 크기 조정 */
+            font-family: inherit; /* 현재 HTML의 폰트와 동일하게 설정 */
+        }
+
+        input[type="radio"] {
+            width: 20px; /* 라디오 버튼의 너비 */
+            height: 20px; /* 라디오 버튼의 높이 */
+            vertical-align: middle; /* 텍스트와 수직 정렬 */
+            margin-right: 10px; /* 라디오 버튼과 텍스트 사이의 간격 */
+        }
+
+        /* 지도 요소 스타일링 */
+        #map, #drone-route-map {
+            position: relative;
+            z-index: 1; /* 지도의 z-index를 낮게 설정 */
+        }
+
+        /* 지도 부모 컨테이너 스타일링 */
+        #map-container, .column_2 {
+            position: relative;
+            z-index: 1; /* 부모 컨테이너의 z-index를 낮게 설정 */
+        }
+
+        .modal {
+            display: none; /* 기본적으로 숨김 */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content1 {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-content2 {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #fff;
+            width: 80%;
+            max-width: 300px;
+            text-align: left;
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute; /* absolute 위치 지정 */
+            top: 5px; /* 원하는 만큼 위로 이동 (기본값보다 위로 이동) */
+            right: 11px; /* 오른쪽 여백 유지 */
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .face-img {
+            width: 100px; /* 이미지 컨테이너에 맞게 조정 */
+            height: 100px; /* 비율을 유지한 채로 높이 자동 조정 */
+            border-radius: 10px; /* 원하는 경우 이미지에 둥근 모서리 추가 */
+            object-fit: cover; /* 이미지를 컨테이너에 맞게 조정 */
+        }
+
+</style>
+
+</head>
+<body>
+    <header>
+        <span class="header-text">실종자 추적</span>
+         <div class="dropdown">
+            <button id="img-button" name="category"><img src="/static/images/menu.png" alt="메뉴"></button>
+            <div class="dropdown-content">
+                <a href="/chart">메인 화면</a>
+                <a href="/missing_info">실종자 등록</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container"> <!-- id = video-container를 class= container 로 -->
+        <div class="row row-1" style="height: 520px;">
+            <div class="column column_1">
+                <img id="video-stream" src="" alt="Video Stream" width="480" height="320">
+                <div id="status">녹화 여부 : 녹화 중지 </div>
+            </div>
+
+            <div class="column column_2">
+                <!-- <div id="map-container"></div> -->
+                <div id="map"></div>
+                <div id="address">{{ address }}</div>
+                <div id="drone-route-map"></div>
+                <div id="drone-route">드론 수색 경로</div>
+
+            </div>
+
+            <!-- <div class="column column_3">
+                <div id="route_map"></div>
+                <div id="drone-route">{{ drone_route }}</div>
+            </div> -->
+
+            <div class="column column_4">
+                <div id="sensor">
+                    <br>
+                    <label id="sensor_label"> < 실종자 정보 > </label>
+                    <br>
+                    <label id="missing_date"> ▷ 실종일자 : {{ data.date }}</label>
+                    <br>
+                    <label id="missing_placee"> ▷ 실종지역 : {{ data.place }}</label>
+                    <br>
+                    <label id="name"> ▷ 이름 : {{ data.name }}</label>
+                    <br>
+                    <label> ▷ 성별 : {{ data.gender }}</label>
+                    <br>
+                    <label> ▷ 나이 : {{ data.age }}</label>
+                    <br>
+                    <label> ▷ 상의 : {{ data.upper }}</label>
+                    <br>
+                    <label> ▷ 하의 : {{ data.lower }}</label>
+                    <br>
+                    <label> ▷ 신발 : {{ data.shoes }}</label>
+                </div>
+
+                <div id="button-container">
+                    <button class="direction-button" id="up-button">
+                        <img src="/static/images/up.png">
+                    </button>
+                       <div id="lower_btn">
+                           <button class="direction-button" id="left-button">
+                                <img src="/static/images/left.png">
+                           </button>
+                           <button class="direction-button" id="down-button">
+                                <img src="/static/images/down.png">
+                           </button>
+                           <button class="direction-button" id="right-button">
+                                <img src="/static/images/right.png">
+                           </button>
+                       </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row row-2">대상자 수색 사진자료</div>
+
+        <div class="row row-3">
+                <div class="column column_5"><img id="img1" src="missing_icon.jpg"></div>
+                <div class="column column_5"><img id="img2" src="missing_icon.jpg"></div>
+                <div class="column column_5"><img id="img3" src="missing_icon.jpg"></div>
+                <div class="column column_5"><img id="img4" src="missing_icon.jpg"></div>
+                <div class="column column_5"><img id="img5" src="missing_icon.jpg"></div>
+
+                <div class="column column_6">
+                    {% if img1 %}
+                    <img src="data:image/jpeg;base64,{{ img1 }}" alt="실종자 사진1">
+                    {% else %}
+                    <img src="사진1" alt="실종자 사진1">
+                    {% endif %}
+                </div>
+
+                <div class="column column_6">
+                    {% if img2 %}
+                    <img src="data:image/jpeg;base64,{{ img2 }}" alt="실종자 사진2">
+                    {% else %}
+                    <!-- <img src="사진2" alt="실종자 사진2"> -->
+                    <img src="/static/images/people.png">
+                    {% endif %}
+                </div>
+        </div>
+
+        <div class="row row-4" style="height: 70px;">
+            <div class="column column_7">동원된 드론 수 : 00대</div>
+            <div class="column column_8">
+                <button class="footer_button1" onclick="location.href='drone_route.html'"> 경로 재설정 </button>
+                <button class="footer_button2" onclick="openModal()"> 수색종료 </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content1">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>수색 결과</h2>
+            <div class="modal-content2">
+                <form id="searchStatusForm" method="POST" action="/update_search_status" onsubmit="return handleFormSubmit(event)">
+                    <label class="radio-label">
+                        <input type="radio" name="searchStatus" value="completed"> 실종자 수색 완료
+                    </label><br>
+                    <label class="radio-label">
+                        <input type="radio" name="searchStatus" value="incomplete"> 실종자 수색 미완료
+                    </label><br><br>
+                    <input type="hidden" name="id" value="{{ data.id }}">
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button type="submit" class="footer_button3">확인</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+
+        const socket = io();
+
+    // 소켓 이벤트 처리
+    socket.on('connect', function () {
+        console.log('Connected');
+    });
+
+// Counter for image IDs (img1, img2, img3, ...)
+let imageCounter = 0;
+
+// Select the images containers
+const imageContainers = [
+    document.getElementById('img1'),
+    document.getElementById('img2'),
+    document.getElementById('img3'),
+    document.getElementById('img4'),
+    document.getElementById('img5')
+];
+
+function handleFormSubmit(event) {
+    event.preventDefault(); // 폼 제출 중단
+
+    const form = event.target;
+    const searchStatus = form.searchStatus.value;
+
+    if (searchStatus === 'completed') {
+        alert('실종자 수색이 완료되었습니다.');
+    } else if (searchStatus === 'incomplete') {
+        alert('실종자 수색이 완료되지 않았습니다.');
+    }
+
+    form.submit(); // 폼 제출 재개
+}
+
+
+// 소켓 이벤트 'face'를 처리하는 함수
+socket.on('face', function(data) {
+    // Check if there are more image containers available
+    if (imageCounter < imageContainers.length) {
+        // Set base64 image data to the corresponding image container
+        const imgElement = imageContainers[imageCounter];
+        imgElement.src = `data:image/jpeg;base64, ${data.image}`;
+        imgElement.classList.add('face-img'); // Add CSS class
+
+        // Create and append the buttons
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('button-container');
+
+        // Create X button
+        const xButton = document.createElement('button');
+        xButton.textContent = 'X';
+        xButton.classList.add('delete-button');
+        xButton.addEventListener('click', function() {
+            // Remove image and button container
+            imgElement.src = '';
+            imgElement.classList.remove('face-img');
+            imgElement.parentNode.removeChild(buttonContainer);
+
+            // Rearrange images when an image is deleted
+            rearrangeImages();
+        });
+
+        // Append buttons to button container
+        buttonContainer.appendChild(xButton);
+
+        // Append button container to image container
+        imgElement.parentNode.appendChild(buttonContainer);
+
+        // Increment image counter
+        imageCounter++;
+
+        // Check if imageCounter is 5, then stop capturing new images
+        if (imageCounter === imageContainers.length) {
+            console.log('Maximum number of images reached.');
+        }
+    } else {
+        console.log('Maximum number of images reached.');
+    }
+});
+
+
+// 이미지 재배치 함수
+function rearrangeImages() {
+    // Rearrange images
+    for (let i = 0; i < imageContainers.length - 1; i++) {
+        const currentImg = imageContainers[i];
+        const nextImg = imageContainers[i + 1];
+
+        // Check if current image is empty and next image is not
+        if (!currentImg.src && nextImg.src) {
+            // Move image source and apply 'face-img' class
+            currentImg.src = nextImg.src;
+            currentImg.classList.add('face-img');
+            nextImg.src = ''; // Clear next image
+
+            // Move the button container if exists
+            const currentButtonContainer = currentImg.parentNode.querySelector('.button-container');
+            const nextButtonContainer = nextImg.parentNode.querySelector('.button-container');
+            if (nextButtonContainer) {
+                currentImg.parentNode.appendChild(nextButtonContainer);
+            }
+        }
+    }
+
+    // Decrease imageCounter after rearranging images
+    if (imageCounter > 0) {
+        imageCounter--;
+    }
+}
+
+
+    socket.on('video_stream', function (data) {
+        var img = document.getElementById('video-stream');
+        img.src = 'data:image/jpeg;base64,' + data.video;
+    });
+
+    socket.on('recording_status', function(data) {
+        const status = document.getElementById('status');
+        if (data.status === 'recording') {
+            status.textContent = '녹화 여부: 녹화중';
+        } else {
+            status.textContent = '녹화 여부: 녹화 중지';
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'r') {
+            // 'r' 키를 누르면 녹화 시작
+            socket.emit('start_recording');
+            console.log('녹화 시작');
+        } else if (event.key === 's') {
+            // 's' 키를 누르면 녹화 중지
+            socket.emit('stop_recording');
+            console.log('녹화 중지');
+        }
+    });
+
+
+    socket.on('disconnect', function () {
+        console.log('Disconnected');
+    });
+
+
+
+function sendMapRequest() {
+    let map; // 지역 변수로 변경
+    let marker; // 지역 변수로 변경
+
+    fetch('/map')
+        .then(response => response.json())
+        .then(data => {
+            var latitude = data.latitude;
+            var longitude = data.longitude;
+            var address = data.address;
+
+            // 지도가 초기화되지 않았을 경우에만 초기화
+            if (!map) {
+                map = L.map('map').setView([latitude, longitude], 18);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+            } else {
+                // 이미 초기화된 경우, 지도의 중심 좌표만 업데이트
+                map.setView([latitude, longitude], 18);
+            }
+
+            // 마커가 없는 경우 새로 생성
+            if (!marker) {
+                marker = L.marker([latitude, longitude]).addTo(map);
+            } else {
+                // 이미 있는 경우, 마커의 위치만 업데이트
+                marker.setLatLng([latitude, longitude]);
+            }
+
+            // 주소 업데이트
+            document.getElementById('address').textContent = address;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
+
+// 0.1초 간격으로 sendMapRequest 함수 반복 실행
+setInterval(sendMapRequest, 5000);
+// 지도 초기화 함수
+function initializeMap() {
+    fetch('/load_map') // 서버에 '/load_map' 엔드포인트로 GET 요청을 보냄
+        .then(response => response.json()) // JSON 형식으로 응답을 파싱
+        .then(data => {
+            var latitude = data.current_location.latitude; // 현재 위치의 위도
+            var longitude = data.current_location.longitude; // 현재 위치의 경도
+            var routes = data.routes; // 경로 배열
+
+            // OpenStreetMap을 사용하여 지도 초기화
+            var map = L.map('drone-route-map').setView([latitude, longitude], 15);
+
+            // 지도 타일 레이어 추가
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // 경로 순서대로 마커와 폴리라인 추가
+            var routeCoordinates = [];
+            routes.forEach(function(route, index) {
+                var marker = L.marker([route.latitude, route.longitude]).addTo(map).bindPopup('경로 ' + String.fromCharCode(65 + index));
+                routeCoordinates.push([route.latitude, route.longitude]);
+            });
+
+            // 폴리라인 추가
+            L.polyline(routeCoordinates, {color: 'red'}).addTo(map);
+        })
+        .catch(error => {
+            console.error('Error fetching routes:', error);
+        });
+}
+
+setInterval(initializeMap, 5500);
+
+// 페이지 로드 시 지도 초기화 함수 호출
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMap();
+});
+
+
+// 이미지 저장(스크록락)
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ScrollLock') {
+            var img = document.getElementById('video-stream');
+            var imgSrc = img.src.split(',')[1]; // base64 데이터만 추출
+            saveImageToDesktop(imgSrc);
+        }
+    });
+// 사진을 찍는 함수
+    function captureImage() {
+        var img = document.getElementById('video-stream');
+        var imgSrc = img.src.split(',')[1]; // base64 데이터만 추출
+        saveImageToDesktop(imgSrc);
+    }
+
+    function saveImageToDesktop(base64Data) {
+        var byteCharacters = atob(base64Data);
+        var byteNumbers = new Array(byteCharacters.length);
+        for (var i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        var byteArray = new Uint8Array(byteNumbers);
+        var blob = new Blob([byteArray], { type: 'image/jpeg' });
+        var fileName = 'captured_image.jpeg';
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+
+
+
+//방향키 이벤트
+
+document.addEventListener('keydown', function(event) {
+    // 어떤 화살표 키가 눌렸는지 확인
+    switch(event.key) {
+        case 'ArrowUp':
+            document.getElementById('up-button').style.backgroundColor = '#e0e0e0';
+            sendDirection('up'); // 서버로 방향 신호 전송
+            break;
+        case 'ArrowDown':
+            document.getElementById('down-button').style.backgroundColor = '#e0e0e0';
+            sendDirection('down'); // 서버로 방향 신호 전송
+            break;
+        case 'ArrowLeft':
+            document.getElementById('left-button').style.backgroundColor = '#e0e0e0';
+            sendDirection('left'); // 서버로 방향 신호 전송
+            break;
+        case 'ArrowRight':
+            document.getElementById('right-button').style.backgroundColor = '#e0e0e0';
+            sendDirection('right'); // 서버로 방향 신호 전송
+            break;
+    }
+});
+
+// 키를 뗄 때 버튼 배경색 초기화
+document.addEventListener('keyup', function(event) {
+    switch(event.key) {
+        case 'ArrowUp':
+            document.getElementById('up-button').style.backgroundColor = '';
+            break;
+        case 'ArrowDown':
+            document.getElementById('down-button').style.backgroundColor = '';
+            break;
+        case 'ArrowLeft':
+            document.getElementById('left-button').style.backgroundColor = '';
+            break;
+        case 'ArrowRight':
+            document.getElementById('right-button').style.backgroundColor = '';
+            break;
+    }
+});
+
+// 방향 신호를 서버로 전송하는 함수
+function sendDirection(direction) {
+    console.log('Direction: ' + direction); // 테스트용 콘솔 출력
+    // 방향을 서버로 전송하는 코드 구현
+    // 예: socket.emit('direction', { direction: direction });
+}
+
+    // 모달 열기
+    function openModal() {
+        document.getElementById('myModal').style.display = "block";
+    }
+
+    // 모달 닫기
+    function closeModal() {
+        document.getElementById('myModal').style.display = "none";
+    }
+
+    // 모달 외부 클릭 시 닫기
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('myModal')) {
+            closeModal();
+        }
+    }
+
+    // 수색 상태 제출
+    function submitSearchStatus() {
+        const form = document.getElementById('searchStatusForm');
+        const formData = new FormData(form);
+        const searchStatus = formData.get('searchStatus');
+        alert(`수색 상태: ${searchStatus}`);
+        closeModal();
+    }
+
+</script>
+</body>
+</html>

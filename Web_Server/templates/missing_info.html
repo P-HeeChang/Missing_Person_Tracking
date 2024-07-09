@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실종자 정보 입력</title>
+    <style>
+        html {
+            font-family: 'g마켓 산스 TTF', sans-serif;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            margin: 0;
+            background-color: #f8f8f8;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 1300px;
+            background-color: #646363;
+            border-radius: 12px;
+            color: #000000;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+                #img-button img {
+            width: 30px; /* 이미지의 크기 조정 */
+        }
+
+        .header-text {
+            background-color: #ffffff;
+            border: 1px solid #ffffff; /* 보더 스타일 설정 */
+            padding: 5px 20px; /* 내부 여백 설정 */
+            border-radius: 12px; /* 보더의 모서리를 둥글게 설정 */
+            margin: 0px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: default;
+        }
+                #img-button {
+            background-color: #ffffff;
+            border: 1px solid #e4e4e4;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 30px;
+            padding: 5px 20px; /* 위, 아래 5px, 왼쪽, 오른쪽 10px 여백 */
+        }
+
+        #img-block {
+            width: 200px;
+            height: 600px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        #missing-img, #second-div{
+             border-radius: 10px;
+            border: 1px solid #ccc;
+            position: relative;
+            top : 20px;
+            left : 20px;
+            background-color: #e6e5e5;
+            max-width: 520px;
+            max-height: 300px;
+            margin-bottom: 20px;
+        }
+
+        /* 생략된 기존 스타일 */
+        .missing-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            background-color: #e6e5e5;
+            max-width: 520px;
+            max-height: 300px;
+            margin-bottom: 20px;
+        }
+
+
+        .missing_info {
+            width: 1300px;
+            background-color: #ffffff;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: row; /* Flex direction을 row로 설정하여 가로 배치 */
+            justify-content: space-between;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .content, .missing-image-container {
+            width: 48%; /* 두 div의 너비를 각각 48%로 설정하여 균등 배치 */
+            background-color: #f0f0f0;
+    border: 5px solid #e4e4e4;
+    border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .missing-image-container {
+            position: relative;
+        }
+
+        .file-input-container {
+            position: relative;
+        }
+
+        #img-upload {
+              position: absolute;
+            top: 0;
+            right: 0;
+            margin-top: 5px;
+        }
+
+
+
+        .missing_info2, .description {
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            background-color: #e6e5e5;
+            margin: 20px;
+            padding: 10px;
+            width: 550px;
+            box-sizing: content-box;
+            position: relative;
+            right : 25px;
+        }
+        .column {
+    display: flex;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    background-color: #ffffff;
+    justify-content: center;
+    align-items: center;
+    border: 5px solid #e4e4e4;
+    color: #646363;
+}
+
+.footer_button {
+    background-color: #646363;
+    margin: 0px 30px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    padding: 10px 30px;
+    text-align: center;
+    display: inline-block;
+    font-size: 18px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+                .row {
+            background-color: #fff;
+            padding: 0px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+                .row-4 {                            /* 동원된 드론 수 */
+            height: 60px;
+            align-items: center;
+            justify-content: space-between; /* 열을 좌우로 정렬 */
+        }
+
+           .column_5 {
+        width: 250px;
+        height: 40px;
+        }
+        .column_6 {
+            width: 250px;
+            height: 40px;
+            border: none;
+            justify-content: center;
+            }
+
+        .input {
+            border-radius: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+            margin: 20px 0px;
+            text-align: center;
+        }
+
+        .input-label {
+            font-weight: bold;
+            margin-right: 5px;
+            margin: 5px;
+        }
+
+        .color-picker {
+            margin-top : 22px;
+            margin-right : 50px;
+            float: right;
+        }
+
+        .colorLabel {
+            display: inline-block;
+            width: 60px;
+            height: 20px;
+            margin: 5px;
+        }
+
+        .alert-container {
+            margin-top: 20px;
+        }
+
+        .alert {
+            display: none;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 5px;
+            position: absolute;
+            top: 30px;
+            left: -120px;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        #img-button {
+            background-color: #ffffff;
+            border: 1px solid #e4e4e4;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 30px;
+            padding: 5px 20px;
+        }
+
+        #img-button img {
+            width: 30px;
+            height: 30px;
+        }
+
+        #save_page {
+            height: 70px;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            padding: 0px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+
+        #save_btn {
+            background-color: #646363;
+            margin: 0px 30px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            text-align: center;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+            position : relative;
+            left : 1150px;
+        }
+
+    </style>
+</head>
+<body>
+<header>
+    <span class="header-text">실종자 정보 입력</span>
+    <div class="dropdown">
+        <button id="img-button" name="category"><img src="/static/images/menu.png" alt="메뉴"></button>
+        <div class="dropdown-content">
+            <a href="/chart">메인 화면</a>
+            <a href="/missing_info">실종자 등록</a>
+        </div>
+    </div>
+</header>
+<form action="/save_info" method="POST" enctype="multipart/form-data">
+    <div class="missing_info">
+        <div class="content">
+            <label class="input-label" id="missing-info-label">실종자 정보</label>
+            <div class="missing_info2">
+                <label class="input-label">이름</label> <input class="input" placeholder="홍길동" name="name">
+                <label class="input-label">신장</label> <input class="input" placeholder="169 (cm)" name="height">
+                <br>
+                <label class="input-label">성별</label> <input class="input" placeholder="남 / 여" name="gender">
+                <label class="input-label">나이</label> <input class="input" placeholder="28 (세)" name="age">
+                <br>
+                <label class="input-label">장소</label> <input class="input" placeholder="ㅇㅇ동" name="place">
+                <label class="input-label">일시</label> <input class="input" placeholder="2024.06.11" name="date">
+            </div>
+            <label class="input-label" id="description-label">인상 착의</label>
+            <div class="description">
+                <label class="input-label">상의</label> <input class="input" name="upper">
+                <label for="colorPicker1">색상 선택 :</label>
+                <label class="colorLabel" id="colorLabel1"> #000000</label>
+                <input type="color" id="colorPicker1" class="color-picker" name="upper_color">
+                <br>
+                <label class="input-label">하의</label> <input class="input" name="lower">
+                <label for="colorPicker2">색상 선택 :</label>
+                <label class="colorLabel" id="colorLabel2"> #000000</label>
+                <input type="color" id="colorPicker2" class="color-picker" name="lower_color">
+                <br>
+                <label class="input-label">신발</label> <input class="input" name="shoes">
+                <label for="colorPicker3">색상 선택 :</label>
+                <label class="colorLabel" id="colorLabel3"> #000000</label>
+                <input type="color" id="colorPicker3" class="color-picker" name="shoes_color">
+            </div>
+        </div>
+           <div class="missing-image-container" style="height: 690px;">
+                <div class="file-input-container">
+                <label class="input-label" id="missing-img-label">실종자 사진</label>
+                <div id="missing-img" style="width: 510.14px; height: 284.4px;">
+                    <img id="missing-img-preview" src="" alt="이미지">
+                </div>
+                <div id="second-div" style="width: 510.14px; height: 284.4px;">
+                    <img id="second-div-preview" src="" alt="이미지">
+                </div>
+                <input type="file" id="img-upload" accept="image/*" name="missing_img" multiple="">
+            </div>
+           </div>
+        </div>
+<!--    <div id="save_page">-->
+<!--                    <div class="column column_5">동원된 드론 수 : 00대</div>-->
+<!--        <button id="save_btn" type="submit" onclick="location.href=/save_info&#39;">저장</button>-->
+<!--    </div>-->
+         <div class="row row-4" style="height:70px;">
+            <div class="column column_5">동원된 드론 수 : 00대</div>
+            <div class="column column_6">
+                <button class="footer_button" onclick="location.href='/save_info'"> 저장 </button>
+            </div>
+        </div>
+</form>
+
+<script>
+    document.getElementById('img-upload').addEventListener('change', function(event) {
+        if (this.files.length > 2) {
+            alert('사진은 최대 2개까지 업로드할 수 있습니다.');
+            this.value = ''; // 선택한 파일을 초기화합니다.
+        }
+    });
+</script>
+
+
+<script>
+
+
+
+<!--색상 파레트-->
+const colorPickers = document.querySelectorAll('.color-picker');
+
+colorPickers.forEach((colorPicker, index) => {
+    const correspondingLabel = document.querySelector(`label[for="${colorPicker.id}"]`);
+    const colorLabel = correspondingLabel.nextElementSibling;
+    const colorText = colorLabel.nextElementSibling;
+
+    colorLabel.textContent = ' ' + colorPicker.value; // 초기 선택된 색상 텍스트로 설정
+    colorText.value = colorPicker.value; // 텍스트박스 초기값 설정
+
+    colorPicker.addEventListener('input', function(event) {
+        const selectedColor = event.target.value;
+        colorLabel.textContent = ' ' + selectedColor; // 선택한 색상 코드를 해당 라벨에 표시
+        colorText.value = selectedColor; // 텍스트박스에 선택한 색상 표시
+    });
+});
+ document.getElementById('img-upload').addEventListener('change', function(event) {
+            const files = event.target.files;
+            const divs = ['missing-img-preview', 'second-div-preview'];
+            let index = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.getElementById(divs[index]);
+                        img.src = e.target.result; // 이미지 소스를 설정
+                        img.style.objectFit = 'contain'; // 이미지를 잘리지 않게 맞춤
+                        index++;
+                        if (index >= divs.length) {
+                            index = 0;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+
+
+
+    // 화면 비율 조절
+    window.addEventListener('resize', function() {
+        var screenWidth = window.innerWidth;
+        var baseWidth = 980; // 기준 화면 너비
+        var ratio = screenWidth / baseWidth;
+        var newWidth = 430 * ratio; // 초기 가로 크기
+        var newHeight = 317 * ratio; // 초기 세로 크기
+
+        // 최소 가로 크기와 최대 가로 크기 설정
+        newWidth = Math.min(Math.max(newWidth, 430), 900); // 최소 300px, 최대 600px
+        newHeight = Math.min(Math.max(newHeight, 317), 600); // 최소 200px, 최대 400px
+
+        // missing-img의 크기 조정
+        document.getElementById('missing-img').style.width = newWidth + 'px';
+        document.getElementById('missing-img').style.height = newHeight + 'px';
+
+        // second-div의 크기 조정
+        document.getElementById('second-div').style.width = newWidth + 'px';
+        document.getElementById('second-div').style.height = newHeight + 'px';
+
+        document.getElementById('third-div').style.width = newWidth + 'px';
+        document.getElementById('third-div').style.height = newHeight + 'px';
+
+        document.getElementById('forth-div').style.width = newWidth + 'px';
+        document.getElementById('forth-div').style.height = newHeight + 'px';
+    });
+    // 초기화
+    window.dispatchEvent(new Event('resize'));
+
+
+
+
+</script>
+
+
+
+
+
+
+
+</body></html>

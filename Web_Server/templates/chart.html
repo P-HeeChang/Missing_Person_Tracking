@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>실종자 수색현황</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+    html {
+        font-family: 'g마켓 산스 TTF', sans-serif;
+        background-color: #f8f8f8;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        margin: 0;
+        background-color: #f8f8f8;
+        min-height: 100vh;
+    }
+        header {
+            width: 1300px;
+            background-color: #646363;
+            border-radius: 12px;
+            color: #000000;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        #img-button img {
+            width: 30px; /* 이미지의 크기 조정 */
+        }
+        .header-text {
+            background-color: #ffffff;
+            border: 1px solid #ffffff; /* 보더 스타일 설정 */
+            padding: 5px 20px; /* 내부 여백 설정 */
+            border-radius: 12px; /* 보더의 모서리를 둥글게 설정 */
+            margin:0px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: default;
+        }
+        h1 { color:#000000; font-size: 25px; }
+        #img-button img {
+            width: 30px;
+        }
+        #img-button {
+            background-color: #ffffff;
+            border: 1px solid #e4e4e4;
+            border-radius: 10px;
+            cursor: pointer;
+            padding: 5px 20px;
+            margin-right:30px;
+        }
+
+
+        #myPieChart {
+            width: 300px;
+            height: 300px;
+        }
+
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            position: absolute;
+            top: 30px;
+            left: -120px;
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .container {
+            width: 1300px;
+            height: 800px;
+            background-color: #ffffff;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+        }
+        .row {
+            background-color: #fff;
+            padding: 0px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .row-1 {                            /* 수색기록, 수색통계자료 */
+            height: 470px;
+            display: flex;
+            justify-content: space-between; /* 열을 좌우로 정렬 */
+        }
+
+        .row-2 {                            /* "대상자 수색 사진자료"의 라벨 */
+            height: 50px;
+            background-color: #e4e4e4;
+            font-weight: bold;
+        }
+        .row-3 {                            /* 날씨 정보 */
+            height: 210px;
+            display: flex;
+            justify-content: space-between; /* 두 요소를 나란히 배치 */
+            align-items: center;
+            padding : 10px;
+        }
+        .row-4 {                            /* 동원된 드론 수 */
+            height: 70px;
+            align-items: center;
+            justify-content: space-between; /* 열을 좌우로 정렬 */
+        }
+        .column {
+            display: flex;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background-color: #ffffff;
+            justify-content: center;
+            align-items: center;
+            border: 5px solid #e4e4e4;
+            color: #646363;
+        }
+        .column_1 {                         /* 수색기록 */
+            width: 600px;
+            height: 410px;
+            font-size: 1em;
+            flex-direction: column;
+        }
+        .column_2 {                         /* 수색 통계 자료 */
+            width: 600px;
+            height: 410px;
+            font-size: 2em;
+            flex-direction: column;
+            }
+        .column_3 {
+            width: 110px;
+            height: 150px;
+            margin: 10px;
+            border: 0px;
+            font-size: 1.1em;
+            }
+        .column_4 {
+            width: 250px;
+            height: 140px;
+            margin-left: 40px;
+            font-size: 1.2em;
+            }
+            .column_5 {
+                width: 250px;
+                height: 40px;
+                }
+        .column_6 {
+            width: 250px;
+            height: 40px;
+            border: none;
+            justify-content: center;
+            }
+        .footer_button {
+            background-color: #646363;
+            margin: 0px 30px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            text-align: center;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .table-container {
+            width: 100%;
+            max-width: 800px; /* 원하는 최대 너비로 설정 */
+            height: 400px; /* 원하는 고정 높이로 설정 */
+            overflow-y: auto; /* 세로 스크롤바 추가 */
+            overflow-x: hidden; /* 가로 스크롤바 숨김 */
+            border: 5px solid #e4e4e4; /* 테이블 테두리 */
+        }
+
+        .date-time-box {
+            width: 100%;
+            background-color: #f2f2f2;
+            border: 5px solid #e4e4e4;
+            border-radius: 12px;
+            margin: 15px 0; /* 상하 여백 추가 */
+            padding: 5px; /* 여백을 줄이기 위해 패딩 조정 */
+            box-sizing: border-box;
+            text-align: center; /* 텍스트 가운데 정렬 */
+        }
+        .weather-box{
+            height: 150px;
+            width: 100%;
+            background-color: #f2f2f2;
+            border: 5px solid #e4e4e4;
+            border-radius: 12px;
+            margin: 10px 0; /* 상하 여백 추가 */
+            padding: 5px; /* 여백을 줄이기 위해 패딩 조정 */
+            box-sizing: border-box;
+            text-align: center; /* 텍스트 가운데 정렬 */
+        }
+        .weather-box h2, .weather-box p {
+            margin: 2px 0; /* 위아래 여백을 줄이기 위해 margin 조정 */
+            padding: 0; /* 필요에 따라 padding도 조정 */
+        }
+        .weather-container {
+            display: flex;
+            justify-content: center; /* 가로로 나란히 정렬 */
+        }
+        .weather-box1, .weather-box2 {
+            border: 3px;
+            border-radius: 12px;
+            background-color: None;
+            padding: 10px;
+            margin: 0px 30px; /* 좌우 여백 추가 */
+            text-align: left; /* 글씨 왼쪽 정렬 */
+        }
+        .date-time-box {
+            font-weight: bold;
+            height: 40px; /* 날짜 정보 박스의 높이를 조정 */
+            margin: 0px 0;
+            text-align: center; /* 텍스트 가운데 정렬 */
+        }
+
+
+        .table1 {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        .table1 th, .table1 td {
+            border: 5px solid #e4e4e4;
+            height: 40px; /* 모든 행의 높이를 40px로 고정 */
+        }
+
+        .table1 thead th {
+            height: 40px;
+            background-color: #f2f2f2;
+        }
+
+        .table1 .incomplete {
+            color: red;
+        }
+
+        .table1 .complete {
+            color: blue;
+        }
+
+        .table1 th:nth-child(1), .table1 td:nth-child(1) {
+            width: 110px;
+        }
+
+        .table1 th:nth-child(2), .table1 td:nth-child(2) {
+            width: 70px;
+        }
+
+        .table1 th:nth-child(3), .table1 td:nth-child(3) {
+            width: 60px;
+        }
+
+        .table1 th:nth-child(4), .table1 td:nth-child(4) {
+            width: 40px;
+        }
+
+        .table1 th:nth-child(5), .table1 td:nth-child(5) {
+            width: 70px;
+        }
+
+        .table1 th:nth-child(6), .table1 td:nth-child(6) {
+            width: 70px;
+        }
+
+        .table1 th:nth-child(7), .table1 td:nth-child(7) {
+            width: 50px;
+        }
+
+        .table1 tr:nth-child(1) th, .table1 tr:nth-child(1) td {
+            height: 40px;
+        }
+
+        .table1 tr:nth-child(2) th, .table1 tr:nth-child(2) td {
+            height: 40px;
+        }
+
+        .table1 tr:nth-child(3) th, .table1 tr:nth-child(3) td {
+            height: 40px;
+        }
+
+        .table1 tr:nth-child(4) th, .table1 tr:nth-child(4) td {
+            height: 40px;
+        }
+
+        .table1 tr:nth-child(5) th, .table1 tr:nth-child(5) td {
+            height: 40px;
+        }
+
+        .table1 tr:nth-child(6) th, .table1 tr:nth-child(6) td {
+            height: 40px;
+        }
+
+        .table1 tr:nth-child(7) th, .table1 tr:nth-child(7) td {
+            height: 40px;
+        }
+
+        .table1 input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .table1 input[type="radio"] {
+            width: 20px;
+            height: 20px;
+        }
+        .stat {
+            width: 600px; /* 원하는 너비 */
+            height:340px; /* 원하는 높이 */
+            flex-direction: row;
+            font-size: 18px;
+            border: none;
+        }
+        #stat_1 {
+            width: 180px; /* 원하는 너비 */
+            height:280px; /* 원하는 높이 */
+            background-color: #f2f2f2;
+            padding:30px;
+        }
+        #stat_2 {
+            width: 400px; /* 원하는 너비 */
+            height:340px; /* 원하는 높이 */
+            padding-top:10px;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        .column_7 {
+            display: flex;
+            width: 48%; /* 너비 조정 */
+            flex-direction: column;
+            align-items: center;
+            margin-left: 10px;
+            margin-right: 10px;
+            border: none; /* 경계선 제거 */
+            border-width: 0; /* 경계선 두께 제거 */
+            margin-top: 3px; /* column_7 상단 여백 추가 */
+        }
+        .drone-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 48%; /* 두 박스를 나란히 배치하기 위해 너비 설정 */
+            background-color: #ffffff;
+            border: 5px solid #e4e4e4;
+            border-radius: 12px;
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-top: 3px;
+            padding: 1px; /* 여백을 줄이기 위해 패딩 조정 */
+            height: auto; /* 높이 자동 조정 */
+        }
+
+        .drone-box h2 {
+            margin: 12px 0; /* 제목의 상하 여백을 줄이기 위해 마진 조정 */
+        }
+
+        /* 자연이 테이블 ?? */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        th, td {
+            border: 5px solid #e4e4e4;
+            padding: 0px 4px; /* 상하 여백을 줄이기 위해 패딩 조정 */
+        }
+
+        thead th {
+            height: 20px; /* 상하 여백을 줄이기 위해 높이 조정 */
+            background-color: #f2f2f2;
+        }
+
+        tbody td {
+            height: 20px; /* 각 셀의 높이 조정 */
+        }
+
+        th:nth-child(1), td:nth-child(1) {
+            width: 60%;
+        }
+
+        th:nth-child(2), td:nth-child(2) {
+            width: 20%;
+        }
+
+        th:nth-child(3), td:nth-child(3) {
+            width: 20%;
+        }
+
+        button {
+            padding: 7px 7px; /* 버튼 여백 조정 */
+        }
+
+
+   /* .sort-button {
+        font-size: 10px; /* 폰트 크기를 줄임 */
+        padding: 2px 4px; /* 버튼 내부 여백을 줄임 */
+        margin: 0; /* 버튼 간의 여백을 없앰 */
+        line-height: 1; /* 버튼의 줄 높이를 줄임 */
+    } */
+    </style>
+    <script>
+        function toggleRadio(radio) {
+            if (radio.previousValue === radio.value) {
+                radio.checked = false;
+                radio.previousValue = null;
+            } else {
+                radio.previousValue = radio.value;
+            }
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const formattedDate = now.getFullYear() + '년 ' + (now.getMonth() + 1) + '월 ' + now.getDate() + '일 ' + now.getHours() + '시';
+            document.getElementById('date-time').textContent = formattedDate;
+        }
+
+        window.onload = updateDateTime;
+
+    </script>
+
+    <!-- <script>
+        function sortTableByDate(tableId, columnIndex, descending = false) {
+            const table = document.getElementById(tableId);
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+
+            rows.sort((a, b) => {
+                const dateA = new Date(a.cells[columnIndex].innerText);
+                const dateB = new Date(b.cells[columnIndex].innerText);
+
+                if (descending) {
+                    return dateB - dateA;
+                } else {
+                    return dateA - dateB;
+                }
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script> -->
+
+    <script>
+        let sortDescending = true;
+
+        function toggleSortOrder() {
+            const tableId = 'search-table';
+            const columnIndex = 0;
+            sortTableByDate(tableId, columnIndex, sortDescending);
+
+            const sortButton = document.getElementById('sort-button');
+            if (sortDescending) {
+                sortButton.innerHTML = '▲';
+            } else {
+                sortButton.innerHTML = '▼';
+            }
+            sortDescending = !sortDescending;
+        }
+
+        function sortTableByDate(tableId, columnIndex, descending = false) {
+            const table = document.getElementById(tableId);
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+
+            rows.sort((a, b) => {
+                const dateA = new Date(a.cells[columnIndex].innerText);
+                const dateB = new Date(b.cells[columnIndex].innerText);
+
+                if (descending) {
+                    return dateB - dateA;
+                } else {
+                    return dateA - dateB;
+                }
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+
+</head>
+<body>
+    <header>
+        <span class="header-text">실종자 수색메뉴</span>
+        <div class="dropdown">
+            <button id="img-button" name="category"><img src="/static/images/menu.png" alt="메뉴"></button>
+            <div class="dropdown-content">
+                <a href="/chart">메인 화면</a>
+                <a href="/missing_info">실종자 등록</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row row-1">
+            <div class="column column_1">
+                <h1>6월 수색기록</h1>
+                <div class="table-container">
+                <table class="table1" id="search-table">
+                <thead>
+                    <tr>
+                        <!-- 테이블 헤더 -->
+                        <th>실종일자
+                           <!-- <button class="sort-button" onclick="sortTableByDate('search-table', 0)">▲</button>
+                            <button class="sort-button" onclick="sortTableByDate('search-table', 0, true)">▼</button> -->
+                            <button class="sort-button" id="sort-button" onclick="toggleSortOrder()">▼</button>
+
+
+                        </th>
+                        <th>이름</th>
+                        <th>나이</th>
+                        <th>성별</th>
+                        <th>지역</th>
+                        <th>수색여부</th>
+                        <th>선택</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 테이블 데이터 -->
+                    {% for row in data %}
+                    <tr>
+                        <td>{{ row.date }}</td>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.age }}</td>
+                        <td>{{ row.gender }}</td>
+                        <td>{{ row.place }}</td>
+                        <td>
+                            {% if row.find == 0 %}
+                                <span class="incomplete">미완료</span>
+                            {% elif row.find == 1 %}
+                                <span class="complete">완료</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                           {% if row.find == 0 %}
+                                <input type="radio" name="select" value="{{ row.id }}" onclick="toggleRadio(this)">
+                            {% else %}
+                                <input type="radio" name="select" value="{{ row.id }}" disabled>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+             </div>
+            </div>
+            <div class="column column_2">
+                <h1>수색 통계 자료</h1>
+                <div class="column column_2 stat">
+                    <div id="stat_1">
+                        <div><label for="option1-1"><input type="radio" id="option1-1" name="option1" checked>현재 통계표</label></div>
+                        <div><label for="option1-2"><input type="radio" id="option1-2" name="option1">연간 통계표</label></div>
+                        <div><label for="option1-3"><input type="radio" id="option1-3" name="option1">월간 통계표</label></div>
+                    </div>
+                    <div id="stat_2">
+                        <div>통계자료표</div>
+                        <div><canvas id="myPieChart"></canvas></div>
+                        <script>
+                            // Jinja2 템플릿 엔진을 사용하여 데이터 처리
+                            var notFoundCount = 0;
+                            var foundCount = 0;
+
+                            {% for row in data %}
+                                {% if row.find == 0 %}
+                                    notFoundCount++;
+                                {% elif row.find == 1 %}
+                                    foundCount++;
+                                {% endif %}
+                            {% endfor %}
+
+                            // 수색여부 데이터 가공
+                            const dataFromDatabase = {
+                                labels: ['수색 미완료', '수색 완료'],
+                                datasets: [{
+                                    data: [notFoundCount, foundCount],
+                                    backgroundColor: ['#FF6384', '#36A2EB'],
+                                }]
+                            };
+
+                            // 차트를 생성하는 함수
+                            function createPieChart(data) {
+                                const ctx = document.getElementById('myPieChart').getContext('2d');
+                                new Chart(ctx, {
+                                    type: 'pie',
+                                    data: data,
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: {
+                                                position: 'top',
+                                            },
+                                            tooltip: {
+                                                callbacks: {
+                                                    label: function(tooltipItem) {
+                                                        let label = data.labels[tooltipItem.dataIndex] || '';
+                                                        if (label) {
+                                                            label += ': ';
+                                                        }
+                                                        label += data.datasets[0].data[tooltipItem.dataIndex] + '%';
+                                                        return label;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                });
+                            }
+
+                            // 차트를 생성합니다.
+                            createPieChart(dataFromDatabase);
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row row-2">드론 운용 가능 정보</div>
+        <div class="row row-3">
+            <div class="column_7">
+                <div class="date-time-box" id="date-time"></div>
+                <div class="weather-box">
+                    <h2>현재 날씨 정보</h2>
+                    <div class="weather-container">
+                        <div class="weather-box1">
+                            {% if weather_data %}
+                                {% if weather_data.weather and weather_data.weather[0] %}
+                                    <p>▷ 날씨: {{ weather_data.weather[0].description }}</p>
+                                {% endif %}
+                                {% if weather_data.main %}
+                                    <p>▷ 온도: {{ weather_data.main.temp }}°C</p>
+                                {% endif %}
+                                {% if weather_data.rain %}
+                                    <p>▷ 강우량: {{ weather_data.rain['1h'] if '1h' in weather_data.rain else 0 }} mm</p>
+                                {% endif %}
+                            {% else %}
+                                <p>날씨 정보를 가져올 수 없습니다.</p>
+                            {% endif %}
+                        </div>
+                        <div class="weather-box2">
+                            {% if weather_data %}
+                                {% if weather_data.wind %}
+                                    <p>▷ 풍속: {{ weather_data.wind.speed }} m/s ▷ 풍향: {{ weather_data.wind.deg }}°</p>
+                                {% endif %}
+                                {% if weather_data.visibility %}
+                                    <p>▷ 가시거리: {{ weather_data.visibility }} m</p>
+                                {% endif %}
+                                {% if weather_data.sys %}
+                                    <p>▷ 일출: {{ weather_data.sys.sunrise | timestamp_to_time }} / 일몰: {{ weather_data.sys.sunset | timestamp_to_time }}</p>
+                                {% endif %}
+                            {% else %}
+                                <p>날씨 정보를 가져올 수 없습니다.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drone-box">
+                <h2>드론 운용 가능 기관</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>기관</th>
+                            <th>드론 대수</th>
+                            <th>구조요청</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>A 구조대</td>
+                            <td>5대</td>
+                            <td><button>구조요청</button></td>
+                        </tr>
+                        <tr>
+                            <td>B 구조대</td>
+                            <td>2대</td>
+                            <td><button>구조요청</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row row-4">
+            <div class="column column_5">동원된 드론 수 : 00대</div>
+            <div class="column column_6">
+                <button class="footer_button" onclick="location.href='/row-4'"> 이전 </button>
+                <button class="footer_button" onclick="handleNextClick()"> 다음 </button>
+            </div>
+        </div>
+        <script>
+            function handleNextClick() {
+                const selectedRadio = document.querySelector('input[name="select"]:checked');
+                if (selectedRadio) {
+                    // 폼 생성
+                    const form = document.createElement('form');
+                    form.method = 'POST'; // 폼의 전송 방식은 POST로 설정
+                    form.action = '/get_row_data'; // 폼의 action은 '/get_row_data'로 설정
+
+                    // 숨은 입력 필드 생성 (선택된 라디오 버튼의 값을 포함)
+                    const input = document.createElement('input');
+                    input.type = 'hidden'; // 숨은 입력 필드로 설정
+                    input.name = 'id'; // 입력 필드의 이름은 'id'
+                    input.value = selectedRadio.value; // 선택된 라디오 버튼의 값으로 설정
+                    form.appendChild(input); // 폼에 숨은 입력 필드 추가
+
+                    // 폼을 현재 문서(body)에 추가
+                    document.body.appendChild(form);
+
+                    // 폼 제출
+                    form.submit();
+                } else {
+                    // 폼 생성
+                    const form = document.createElement('form');
+                    form.method = 'POST'; // 폼의 전송 방식은 POST로 설정
+                    form.action = '/go_missing_info'; // 폼의 action은 '/go_missing_info'로 설정
+                    document.body.appendChild(form);
+
+                    form.submit();
+                }
+            }
+            function updateDateTime() {
+            const now = new Date();
+            const formattedDate = now.getFullYear() + '년 ' + (now.getMonth() + 1) + '월 ' + now.getDate() + '일 ' + now.getHours() + '시';
+            document.getElementById('date-time').textContent = formattedDate;
+            }
+
+            window.onload = updateDateTime;
+        </script>
+
+    </div>
+
+</body>
+</html>

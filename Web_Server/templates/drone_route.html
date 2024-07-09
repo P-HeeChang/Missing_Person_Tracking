@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>드론 경로 설정</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+
+
+    <style>
+    html {
+        font-family: 'g마켓 산스 TTF', sans-serif;
+        background-color: #f8f8f8;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        margin: 0;
+        background-color: #f8f8f8;
+        min-height: 100vh;
+    }
+
+        header {
+            width: 1300px;
+            background-color: #646363;
+            border-radius: 12px;
+            color: #000000;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        #img-button img {
+            width: 30px; /* 이미지의 크기 조정 */
+        }
+        .header-text {
+            background-color: #ffffff;
+            border: 1px solid #ffffff; /* 보더 스타일 설정 */
+            padding: 5px 20px; /* 내부 여백 설정 */
+            border-radius: 12px; /* 보더의 모서리를 둥글게 설정 */
+            margin:0px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: default;
+        }
+        #img-button {
+            background-color: #ffffff;
+            border: 1px solid #e4e4e4;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 30px;
+            padding: 5px 20px; /* 위, 아래 5px, 왼쪽, 오른쪽 30px 여백 */
+        }
+
+        #img-block {
+            width: 200px;
+            height: 600px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            position: absolute;
+            top: 30px; /* 원하는 위치로 수정 */
+            left: -120px; /* 원하는 위치로 수정 */
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        #img-button img {
+            width: 30px;
+        }
+        .container {
+            width: 1300px;
+            height: 800px;
+            background-color: #ffffff;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+        }
+        .row {
+            background-color: #fff;
+            padding: 0px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .row-1 {                            /* 수색기록, 수색통계자료 */
+            height: 730px;
+            display: flex;
+            justify-content: space-between; /* 열을 좌우로 정렬 */
+        }
+
+        .row-2 {                            /* 동원된 드론 수 */
+            height: 70px;
+            align-items: center;
+            justify-content: space-between; /* 열을 좌우로 정렬 */
+        }
+
+        #drone_route {
+            width: 620px;
+            height: 720px;
+            font-size: 1em;
+            flex-direction: column;
+            background-color: #f0f0f0;
+            border: 5px solid #e4e4e4;
+            border-radius: 12px;
+            box-sizing: border-box; /* 패딩과 보더를 포함한 전체 너비 설정 */
+        }
+        h1 { color:#000000; font-size: 1em; margin-left:30px; }
+        #map {
+            width: 600px; /* Set desired width */
+            height: 630px; /* Set desired height */
+            background-color: #f8f8f8; /* Optional background color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Ensure image doesn't overflow */
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin: 5px;
+            box-sizing: border-box; /* 패딩과 보더를 포함한 전체 너비 설정 */
+            }
+
+        #map img {
+            width: 100%; /* Make image fill its container horizontally */
+            height: auto; /* Maintain aspect ratio */
+            display: block; /* Remove default image spacing */
+        }
+
+        #route {
+            background-color: #f0f0f0;
+            border: 5px solid #e4e4e4;
+            border-radius: 12px;
+            box-sizing: border-box; /* 패딩과 보더를 포함한 전체 너비 설정 */
+            width: 620px;
+            height: 720px;
+            font-size: 1em;
+            display: flex;
+            flex-direction: column; /* 세로 정렬 */
+            justify-content: center;
+<!--            align-items: flex-start; /* 요소들이 줄바꿈되도록 설정 */-->
+            font-weight: bold;
+        }
+        .route_item {
+            display: flex;
+            align-items: center; /* 세로축 가운데 정렬 */
+        }
+        .route_label {
+            margin-right: 10px; /* 라벨과 인풋 사이 간격 */
+        }
+        #route_C{
+            margin-right : 8px;
+        }
+        .route_input {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-right: 10px;
+            width: 150px;
+            height: 25px;
+            flex: 1; /* 인풋 박스가 남은 공간을 모두 차지하도록 설정 */
+            margin-right: 10px; /* 인풋 박스 오른쪽 마진 추가 */
+            text-align : center;
+        }
+        .order_label {
+            margin-right: 5px;
+        }
+        .order_btn {
+            background-color: #f8f8f8;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .order_div {
+            display: flex;
+            align-items: center; /* 세로축 가운데 정렬 */
+            margin-left: auto; /* 오더 디브를 오른쪽으로 밀기 위해 왼쪽 마진을 자동으로 설정 */
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding : 2px;
+        }
+
+        .route_item {
+            display: flex;
+            align-items: center; /* 세로축 가운데 정렬 */
+            margin : 5px;
+            height : 15;
+            padding : 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .route_item_main {
+            margin : 10px;
+            height : 15;
+            padding : 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            }
+        #drone_route_label{
+            position : relative;
+            top : -40px;
+        }
+        .altitude{
+            item-align : center;
+            margin-left : 35px;
+        }
+        .altitude_label{
+            margin-right : 10px;
+        }
+
+        #address{
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-align : center;
+            margin-top : 20px;
+            background-color: #f0f0f0;
+            padding : 3px;
+            font-size : 15px;
+        }
+        .column {
+            display: flex;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background-color: #ffffff;
+            justify-content: center;
+            align-items: center;
+            border: 5px solid #e4e4e4;
+            color: #646363;
+        }
+        .column_5 {
+            width: 250px;
+            height: 40px;
+            }
+        .column_6 {
+            width: 250px;
+            height: 40px;
+            border: none;
+            justify-content: center;
+            }
+        .footer_button {
+            background-color: #646363;
+            margin: 0px 30px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            text-align: center;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        #reset_btn{
+               background-color: #646363;
+        margin: 0px 30px;
+        border-radius: 10px;
+        border: none;
+        color: white;
+        padding: 10px 30px;
+        text-align: center;
+        display: inline-block;
+        font-size: 18px;
+        margin: 4px 2px;
+        cursor: pointer;
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="header-text">드론 수색 경로</span>
+        <div class="dropdown">
+            <button id="img-button" name="category"><img src="/static/images/menu.png" alt="메뉴"></button>
+            <div class="dropdown-content">
+                <a href="/chart">메인 화면</a>
+                <a href="/missing_info">실종자 등록</a>
+            </div>
+        </div>
+    </header>
+<form id="routeForm" action="/save_route" method="POST">
+    <div class="container">
+
+        <div class="row row-1">
+            <div id="drone_route">
+                <h1>비행 수색 경로</h1>
+                <div id="map"></div>
+            <!--    <div id="address">{{ address }}</div>-->
+            </div>
+                <div id="route">
+
+                    <div class="route_item_main">
+                        <div class="route_item">
+                            <label class="route_label" id="route_A">경로 A</label><input class="route_input" id="route_A_input" name="route_A_input" placeholder="위치 정보">
+                            <div class="order_div"><label class="order_label" id="A_order_label">순서</label><button class="order_btn" id="A_btn" type="button">▼</button></div>
+                        </div>
+                        <div class="altitude"><label class="altitude_label" >위도</label> <input class="route_input" placeholder="위도" id="Latitude_A" name="Latitude_A">
+                        <label class="altitude_label" >경도</label> <input class="route_input" placeholder="경도" id="longitude_A" name="longitude_A"></div>
+                    </div>
+                    <div class="route_item_main">
+                        <div class="route_item">
+                            <label class="route_label" id="route_B">경로 B</label><input class="route_input" id="route_B_input" name="route_B_input" placeholder="위치 정보">
+                            <div class="order_div"><label class="order_label" id="B_order_label">순서</label><button class="order_btn" id="B_btn" type="button">▼</button></div>
+                        </div>
+                        <div class="altitude"><label class="altitude_label" >위도</label> <input class="route_input" placeholder="위도" id="Latitude_B" name="Latitude_B">
+                        <label class="altitude_label" >경도</label> <input class="route_input" placeholder="경도" id="longitude_B" name="longitude_B"></div>
+                    </div>
+                    <div class="route_item_main">
+                        <div class="route_item">
+                            <label class="route_label" id="route_C">경로 C</label><input class="route_input" id="route_C_input" name="route_C_input" placeholder="위치 정보">
+                            <div class="order_div"><label class="order_label" id="C_order_label">순서</label><button class="order_btn" id="C_btn" type="button">▼</button></div>
+                        </div>
+                        <div class="altitude"><label class="altitude_label" >위도</label> <input class="route_input" placeholder="위도" id="Latitude_C" name="Latitude_C">
+                        <label class="altitude_label" >경도</label> <input class="route_input" placeholder="경도" id="longitude_C" name="longitude_C"></div>
+                    </div>
+                               <div class="route_item_main">
+                        <div class="route_item">
+                            <label class="route_label" id="route_D">경로 D</label><input class="route_input" id="route_D_input" name="route_D_input" placeholder="위치 정보">
+                            <div class="order_div"><label class="order_label" id="D_order_label">순서</label><button class="order_btn" id="D_btn" type="button">▼</button></div>
+                        </div>
+                        <div class="altitude"><label class="altitude_label" >위도</label> <input class="route_input" placeholder="위도" id="Latitude_D" name="Latitude_D">
+                        <label class="altitude_label" >경도</label> <input class="route_input" placeholder="경도" id="longitude_D" name="longitude_D"></div>
+                    </div>
+                               <div class="route_item_main">
+                        <div class="route_item">
+                            <label class="route_label" id="route_E">경로 E</label><input class="route_input" id="route_E_input" name="route_E_input" placeholder="위치 정보">
+                            <div class="order_div"><label class="order_label" id="E_order_label">순서</label><button class="order_btn" id="E_btn" type="button">▼</button></div>
+                        </div>
+                        <div class="altitude"><label class="altitude_label">위도</label> <input class="route_input" placeholder="위도"  id="Latitude_E" name="Latitude_E">
+                        <label class="altitude_label">경도</label> <input class="route_input" placeholder="경도"  id="longitude_E" name="longitude_E"></div>
+                    </div>
+                    <button id="reset_btn" type="button">초기화</button>
+                </div>
+
+
+        </div>
+
+
+        <div class="row row-2">
+                <div class="column column_5">현재 운용가능 드론 수 : 00대</div>
+                <div class="column column_6">
+                    <button class="footer_button" onclick="location.href='/row-4'"> 이전 </button>
+                    <form action="{{ url_for('tracking') }}" method="get">
+                        <button class="footer_button" type="submit">다음</button>
+                    </form>
+
+                </div>
+            </div>
+
+    </div>
+</form>
+
+<script>
+    let map;
+    let markers = [];
+    let routePoints = [];
+    let polyline;
+
+    function initializeMap() {
+        fetch('/map')
+            .then(response => response.json())
+            .then(data => {
+                var latitude = data.latitude;
+                var longitude = data.longitude;
+                var address = data.address;
+
+                map = L.map('map').setView([latitude, longitude], 18);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                map.on('click', onMapClick);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+ function onMapClick(e) {
+    let latlng = e.latlng;
+    let index = markers.length;
+
+    if (index < 5) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latlng.lat}&lon=${latlng.lng}`)
+            .then(response => response.json())
+            .then(data => {
+                let address = data.display_name;
+                let routeInputId = `route_${String.fromCharCode(65 + index)}_input`; // A, B, C, D, E 순서로 id 설정
+                let latitudeInputId = `Latitude_${String.fromCharCode(65 + index)}`;
+                let longitudeInputId = `longitude_${String.fromCharCode(65 + index)}`;
+                let routeLabel = String.fromCharCode(65 + index); // A, B, C, D, E 순서로 label 설정
+
+                document.getElementById(routeInputId).value = address;
+                document.getElementById(latitudeInputId).value = latlng.lat;
+                document.getElementById(longitudeInputId).value = latlng.lng;
+
+                addMarker(latlng, address, routeInputId, latitudeInputId, longitudeInputId, routeLabel);
+                routePoints.push([latlng.lat, latlng.lng]);
+
+                // Update polyline with new route points
+                if (polyline) {
+                    polyline.setLatLngs(routePoints);
+                } else {
+                    polyline = L.polyline(routePoints, { color: 'red' }).addTo(map);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    } else {
+        alert('경로에 대한 위치를 이미 설정했습니다.');
+    }
+}
+// reset_btn 클릭 이벤트 처리
+document.getElementById('reset_btn').addEventListener('click', function() {
+    // 모든 마커 제거
+    markers.forEach(function(marker) {
+        map.removeLayer(marker);
+    });
+
+    // 마커 배열 초기화
+    markers = [];
+
+    // HTML에서 클래스 이름이 'route_input'인 인풋박스의 값을 비우기
+    let inputs = document.getElementsByClassName('route_input');
+    for (let i = 0; i < inputs.length; i++) {
+        inputs[i].value = '';
+    }
+
+
+   // routePoints 배열에서 해당 좌표값을 삭제
+    routePoints = []
+
+    if (polyline) {
+        map.removeLayer(polyline);
+        polyline = null;
+    }
+
+    // 재설정된 경로로 다시 라인을 추가합니다.
+    if (routePoints.length > 0) {
+        polyline = L.polyline(routePoints, { color: 'red' }).addTo(map);
+    }
+});
+
+
+function addMarker(latlng, address, routeInputId, latitudeInputId, longitudeInputId) {
+    let marker = L.marker(latlng).addTo(map)
+        .bindPopup(`<b>${address}</b><br>${getRouteLabel(routeInputId)}`)
+        .openPopup();
+
+    // 클릭 이벤트를 추가하여 마커와 관련된 요소들을 삭제합니다.
+    marker.on('dblclick', function (e) {
+        map.removeLayer(marker); // 맵에서 마커 제거
+
+        // 마커 배열에서 제거
+        markers = markers.filter(function (m) {
+            return m !== marker;
+        });
+
+        // 해당하는 인풋박스 초기화
+        document.getElementById(routeInputId).value = '';
+        document.getElementById(latitudeInputId).value = '';
+        document.getElementById(longitudeInputId).value = '';
+
+        // routePoints 배열에서 해당 좌표값을 삭제
+        routePoints = routePoints.filter(function (point) {
+            return !(point[0] === latlng.lat && point[1] === latlng.lng);
+        });
+
+        if (polyline) {
+            map.removeLayer(polyline);
+            polyline = null;
+        }
+
+        // 재설정된 경로로 다시 라인을 추가합니다.
+        if (routePoints.length > 0) {
+            polyline = L.polyline(routePoints, { color: 'red' }).addTo(map);
+        }
+    });
+
+    markers.push(marker); // 마커 배열에 추가
+}
+
+// routeLabelId에 따라 경로 레이블의 내용을 반환하는 함수
+function getRouteLabel(routeLabelId) {
+    let routeLabelElement = document.getElementById(routeLabelId);
+    if (routeLabelElement) {
+        return routeLabelElement.textContent;
+    } else {
+        return '알 수 없는 경로';
+    }
+}
+
+
+
+    document.getElementById('A_btn').onclick = function (event) {
+        event.preventDefault(); // 기본 동작 막기
+        swapRouteValues('A', 'B');
+    };
+    document.getElementById('B_btn').onclick = function (event) {
+        event.preventDefault(); // 기본 동작 막기
+        swapRouteValues('B', 'C');
+    };
+    document.getElementById('C_btn').onclick = function (event) {
+        event.preventDefault(); // 기본 동작 막기
+        swapRouteValues('C', 'D');
+    };
+    document.getElementById('D_btn').onclick = function (event) {
+        event.preventDefault(); // 기본 동작 막기
+        swapRouteValues('D', 'E');
+    };
+    document.getElementById('E_btn').onclick = function (event) {
+        event.preventDefault(); // 기본 동작 막기
+        shiftRouteValues();
+    };
+
+    window.onload = initializeMap;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeMap();
+    });
+
+    function swapValues(element1, element2) {
+        let temp = element2.value;
+        element2.value = element1.value;
+        element1.value = temp;
+    }
+
+    function swapRouteValues(route1, route2) {
+        let label1 = document.getElementById(`route_${route1}`);
+        let label2 = document.getElementById(`route_${route2}`);
+        let tempLabel = label2.textContent;
+        label2.textContent = label1.textContent;
+        label1.textContent = tempLabel;
+
+        // 나머지 코드는 그대로 유지
+        let input1 = document.getElementById(`route_${route1}_input`);
+        let input2 = document.getElementById(`route_${route2}_input`);
+        swapValues(input1, input2);
+
+        let lat1 = document.getElementById(`Latitude_${route1}`);
+        let lat2 = document.getElementById(`Latitude_${route2}`);
+        swapValues(lat1, lat2);
+
+        let lng1 = document.getElementById(`longitude_${route1}`);
+        let lng2 = document.getElementById(`longitude_${route2}`);
+        swapValues(lng1, lng2);
+
+        updateRoutePoints();
+        updateMap();
+    }
+
+function shiftRouteValues() {
+    let tempAddress = document.getElementById(`route_E_input`).value;
+    let tempLat = document.getElementById(`Latitude_E`).value;
+    let tempLng = document.getElementById(`longitude_E`).value;
+    let tempLabel = document.getElementById(`route_E`).textContent;
+
+    for (let i = 4; i > 0; i--) {
+        let route = String.fromCharCode(65 + i); // A, B, C, D, E
+        let prevRoute = String.fromCharCode(65 + (i - 1));
+
+        document.getElementById(`route_${route}_input`).value = document.getElementById(`route_${prevRoute}_input`).value;
+        document.getElementById(`Latitude_${route}`).value = document.getElementById(`Latitude_${prevRoute}`).value;
+        document.getElementById(`longitude_${route}`).value = document.getElementById(`longitude_${prevRoute}`).value;
+        document.getElementById(`route_${route}`).textContent = document.getElementById(`route_${prevRoute}`).textContent;
+    }
+
+    document.getElementById(`route_A_input`).value = tempAddress;
+    document.getElementById(`Latitude_A`).value = tempLat;
+    document.getElementById(`longitude_A`).value = tempLng;
+    document.getElementById(`route_A`).textContent = tempLabel;
+
+    updateRoutePoints();
+    updateMap();
+}
+
+
+    function updateRoutePoints() {
+        routePoints = [];
+        for (let i = 0; i < 5; i++) {
+            let route = String.fromCharCode(65 + i); // A, B, C, D, E
+            let lat = parseFloat(document.getElementById(`Latitude_${route}`).value);
+            let lng = parseFloat(document.getElementById(`longitude_${route}`).value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                routePoints.push([lat, lng]);
+            }
+        }
+    }
+
+    function updateMap() {
+        // Clear existing markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+
+        // Add new markers based on routePoints
+        routePoints.forEach((latlng, index) => {
+            let route = String.fromCharCode(65 + index);
+            let address = document.getElementById(`route_${route}_input`).value;
+            addMarker(L.latLng(latlng[0], latlng[1]), address, `route_${route}_input`, `Latitude_${route}`, `longitude_${route}`);
+        });
+
+        // Update polyline with new route points
+        if (polyline) {
+            polyline.setLatLngs(routePoints);
+        } else {
+            polyline = L.polyline(routePoints, { color: 'red' }).addTo(map);
+        }
+    }
+
+    document.getElementById('A_btn').onclick = function () { swapRouteValues('A', 'B'); };
+    document.getElementById('B_btn').onclick = function () { swapRouteValues('B', 'C'); };
+    document.getElementById('C_btn').onclick = function () { swapRouteValues('C', 'D'); };
+    document.getElementById('D_btn').onclick = function () { swapRouteValues('D', 'E'); };
+    document.getElementById('E_btn').onclick = function () {
+        shiftRouteValues();
+    };
+
+
+function saveAsImageHandler() {
+    // FormData 객체 생성
+    let formData = new FormData();
+
+    // 나머지 데이터 추가
+    formData.append('route_A_input', document.getElementById('route_A_input').value);
+    formData.append('Latitude_A', document.getElementById('Latitude_A').value);
+    formData.append('longitude_A', document.getElementById('longitude_A').value);
+    formData.append('route_B_input', document.getElementById('route_B_input').value);
+    formData.append('Latitude_B', document.getElementById('Latitude_B').value);
+    formData.append('longitude_B', document.getElementById('longitude_B').value);
+    formData.append('route_C_input', document.getElementById('route_C_input').value);
+    formData.append('Latitude_C', document.getElementById('Latitude_C').value);
+    formData.append('longitude_C', document.getElementById('longitude_C').value);
+    formData.append('route_D_input', document.getElementById('route_D_input').value);
+    formData.append('Latitude_D', document.getElementById('Latitude_D').value);
+    formData.append('longitude_D', document.getElementById('longitude_D').value);
+    formData.append('route_E_input', document.getElementById('route_E_input').value);
+    formData.append('Latitude_E', document.getElementById('Latitude_E').value);
+    formData.append('longitude_E', document.getElementById('longitude_E').value);
+
+    // 서버로 데이터 전송
+    fetch('/save_route', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        // 서버에서의 성공 처리
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // 오류 처리
+    });
+}
+
+
+</script>
+</body>
+</html>
