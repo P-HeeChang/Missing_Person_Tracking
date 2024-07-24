@@ -17,7 +17,7 @@ data = {}
 
 address_cache={}
 
-app.secret_key = 'team2'
+app.secret_key = 'key'
 
 recv_data = None
 
@@ -53,8 +53,6 @@ def save_frame_as_image(frame):
 
 def get_db_connection():
     connection = pymysql.connect(
-        # host='192.168.31.75',
-        # user='root1',
         host='127.0.0.1',
         user='root',
         password='0000',
@@ -97,12 +95,9 @@ def get_address_from_lat_lon_google(lat, lon, api_key, retries=3):
 
 @app.route('/map')
 def map():
-    # latitude = 36.371691
-    # longitude = 127.378964
-
-    latitude = 36.348467
-    longitude = 127.382160
-    api_key = 'AIzaSyA432B9qNSn19lPPXy83RsRIXe4oSO2pD8'  # Google API 키
+    latitude = latitude
+    longitude = longitude
+    api_key = 'google Api key'  # Google API 키
     address = get_address_from_lat_lon_google(latitude, longitude, api_key)
     # print(latitude)
     # print(longitude)
@@ -159,8 +154,8 @@ def route_map():
 
         connection.close()
 
-        current_latitude = 36.348467
-        current_longitude = 127.382160
+        current_latitude = latitude
+        current_longitude = longitude
 
         formatted_data = format_data_for_frontend(current_latitude, current_longitude, routes)
         return jsonify(formatted_data)
@@ -228,7 +223,7 @@ def create_missing_persons_table():
 def home():
     return render_template("login.html")
 # OpenWeatherMap API 키
-OWM_API_KEY = '0a9ad2bc2f23cd462a5ea9918e5a7bb1'
+OWM_API_KEY = 'OpenWeatherMap API 키'
 
 @app.template_filter('timestamp_to_time')
 def timestamp_to_time(timestamp):
@@ -440,8 +435,6 @@ def create_routes_table():
 def fetch_colors_from_db(class_name):
     try:
         connection = pymysql.connect(
-            # host='192.168.31.75',
-            # user='root1',
             host='127.0.0.1',
             user='root',
             password='0000',
@@ -740,7 +733,7 @@ def process_object_detection(result, frame, object_class, target_color_bgr):
         print("실종자 색상 : ", target_color_bgr)
         print("탐지된 색상 : ", extracted_color_bgr)
 
-        # 유사성 임계값 설정 (예: 90% 유사성 이상을 유사하다고 판단)
+        # 유사성 임계값 설정 (예: 70% 유사성 이상을 유사하다고 판단)
         similarity_threshold = 70
         if similarity_percent >= similarity_threshold:
             print(similarity_percent, similarity_threshold)
