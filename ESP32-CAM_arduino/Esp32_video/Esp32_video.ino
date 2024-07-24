@@ -3,11 +3,11 @@
 #include "esp_camera.h"
 
 // WiFi 설정
-const char* ssid = "3F_es_room1";
-const char* password = "0424719222";
+const char* ssid = "wifi-name";
+const char* password = "password";
 
 // Flask 서버 주소
-const char* serverAddress = "http://192.168.31.9:5000/stream";
+const char* serverAddress = "http://serveraddress/stream";
 
 // 카메라 모듈 설정
 #define CAMERA_MODEL_AI_THINKER // 보드 지정 코드
